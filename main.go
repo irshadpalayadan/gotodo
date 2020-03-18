@@ -1,11 +1,26 @@
 package main
 
-import(
+import (
+	"encoding/json"
+	"net/http"
+
+	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
-	"fmt"
 )
 
+func getServerStatus(res http.ResponseWriter, req *http.Request) {
+
+	res.Header().Set("Content-Type", "Application/json")
+	json.NewEncoder(res).Encode("Serever running successfully")
+}
+
 func main() {
-	fmt.Print("hello world")
-	log.Info("hello world 2")
+	router := mux.NewRouter()
+
+	router.HandleFunc("/status", getServerStatus).Methods("GET")
+
+	http.ListenAndServe(":8000", router)
+
+	defer log.Fatal("Router creation failed")
+
 }
