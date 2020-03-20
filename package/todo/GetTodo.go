@@ -1,10 +1,9 @@
 package todo
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
@@ -29,9 +28,7 @@ type ReturnData struct {
 
 var todos []TodoItem
 
-func GetTodo(res http.ResponseWriter, req *http.Request) {
-
-	res.Header().Set("Content-Type", "application/json")
+func GetTodo(ctx *gin.Context) {
 
 	rData := &ReturnData{Status: "success", Msg: ""}
 
@@ -41,22 +38,18 @@ func GetTodo(res http.ResponseWriter, req *http.Request) {
 		rData.Data = todos
 	}
 
-	todoJson, err := json.Marshal(rData)
-	if err != nil {
-
-		logrus.WithFields(logrus.Fields{
-			"file": "GetTodo.go",
-			"line": "40",
-		}).Fatal(" error while parsing the json data")
-
-		rData.Status = "failure"
-		rData.Msg = "error while json parsing"
-		rData.Data = "{ }"
-		todoJson, err := json.Marshal(rData)
-		if err != nil {
-			fmt.Fprintln(res, string(todoJson))
-			return
-		}
+	if err := ctx.ShouldBind(&rData); err == nil {
+		ctx.JSON(http.StatusOK, rData)
+		return
 	}
-	fmt.Fprint(res, string(todoJson))
+
+	logrus.WithFields(logrus.Fields{
+		"file": "GetTodo.go",
+		"line": "40",
+	}).Fatal(" error while parsing the json data")
+
+	rData.Status = "failure"
+	rData.Msg = "error while json parsing"
+	rData.Data = "{ }"
+	ctx.JSON(http.StatusOK, rData)
 }

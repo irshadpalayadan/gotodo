@@ -1,28 +1,26 @@
 package main
 
 import (
-	"encoding/json"
-	"net/http"
+	"github.com/gin-gonic/gin"
+	"github.com/irshadpalayadan/gotodo/package/middleware"
+	"github.com/irshadpalayadan/gotodo/package/todo"
 
-	"github.com/gorilla/mux"
-	todo "github.com/irshadpalayadan/gotodo/package/todo"
 	log "github.com/sirupsen/logrus"
 )
 
-func getServerStatus(res http.ResponseWriter, req *http.Request) {
+func getServerStatus(ctx *gin.Context) {
 
-	res.Header().Set("Content-Type", "Application/json")
-	json.NewEncoder(res).Encode("Serever running successfully")
+	ctx.JSON(200, "Serever running successfully")
 }
 
 func main() {
-	router := mux.NewRouter()
+	router := gin.Default()
+	router.Use(middleware.GlobalMiddleware())
 
-	router.HandleFunc("/status", getServerStatus).Methods("GET")
-	router.HandleFunc("/todos", todo.GetTodo).Methods("GET")
-	router.HandleFunc("/todos", todo.AddTodo).Methods("POST")
-
-	http.ListenAndServe(":8000", router)
+	router.GET("/status", getServerStatus)
+	router.GET("/todos", todo.GetTodo)
+	router.POST("/todos", todo.AddTodo)
+	router.Run(":8000")
 
 	defer log.Fatal("Router creation failed")
 
