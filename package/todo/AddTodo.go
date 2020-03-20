@@ -1,46 +1,26 @@
 package todo
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
-func AddTodo(res http.ResponseWriter, req *http.Request) {
-	var tempTodo TodoItem
-	if req.Body == nil {
-		http.Error(res, "please send request body", 400)
-		return
-	}
+func AddTodo(ctx *gin.Context) {
 
-	err := json.NewDecoder(req.Body).Decode(&tempTodo)
-	if err != nil {
-		http.Error(res, err.Error(), 400)
+	var tempTodo TodoItem
+
+	if err := ctx.BindJSON(&tempTodo); err != nil {
+
+		logrus.WithFields(logrus.Fields{
+			"file": "AddTodo.go",
+		}).Fatal("Error while parsing the body")
+
+		ctx.JSON(http.StatusBadRequest, &ReturnData{ Status: "failure", Msg: "invalid data passed", Data: err })
 		return
 	}
 
 	todos = append(todos, tempTodo)
-
-	res.Header().Set("Content-Type", "application/json")
-	rData := &ReturnData{Status: "success", Msg: "todo inserted successfully"}
-	rDataJson, err := json.Marshal(rData)
-	if err != nil {
-
-		logrus.WithFields(logrus.Fields{
-			"file": "GetTodo.go",
-			"line": "40",
-		}).Fatal(" error while parsing the json data")
-
-		rData.Status = "failure"
-		rData.Msg = "error while json parsing"
-		rData.Data = "{ }"
-		rDataJson, err := json.Marshal(rData)
-		if err != nil {
-			fmt.Fprintln(res, string(rDataJson))
-			return
-		}
-	}
-	fmt.Fprint(res, string(rDataJson))
+	ctx.JSON(http.StatusOK, &ReturnData{ Status: "success", Msg: "todo inserted successfully"})
 }
