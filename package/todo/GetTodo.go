@@ -7,32 +7,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// this is some what incorrect if multiple go files uses
-// same global object/type it should be specified in the
-// global constant file with same package
-
-type TodoItem struct {
-	ID           string `json:"id"`
-	USERNAME     string `json:"user"`
-	CreatedTime  int64  `json:"createdat`
-	Content      string `json:"content"`
-	Reminder     bool   `json:"reminder"`
-	ReminderTime int64  `json:"remindat"`
-}
-
-type ReturnData struct {
-	Status string      `json:"status"`
-	Data   interface{} `json:"data"`
-	Msg    string      `json:"msg"`
-}
-
-var todos []TodoItem
-
 func GetTodo(ctx *gin.Context) {
 
-	rData := &ReturnData{Status: "success", Msg: ""}
+	rData := &ReturnData{Status: "success", Msg: ""} // ReturnData defined in TodoGlobal.go
 
-	if len(todos) == 0 {
+	if len(todos) == 0 { // todos defined in TodoGlobal.go
 		rData.Data = struct{}{}
 	} else {
 		rData.Data = todos
