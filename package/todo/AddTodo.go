@@ -9,7 +9,7 @@ import (
 
 func AddTodo(ctx *gin.Context) {
 
-	var tempTodo TodoItem
+	var tempTodo TodoItem // refer TodoGlobal.go
 
 	if err := ctx.BindJSON(&tempTodo); err != nil {
 
@@ -17,10 +17,11 @@ func AddTodo(ctx *gin.Context) {
 			"file": "AddTodo.go",
 		}).Fatal("Error while parsing the body")
 
-		ctx.JSON(http.StatusBadRequest, &ReturnData{ Status: "failure", Msg: "invalid data passed", Data: err })
+		ctx.JSON(http.StatusBadRequest, &ReturnData{Status: "failure", Msg: "invalid data passed", Data: err})
 		return
 	}
 
+	tempTodo.updateId()
 	todos = append(todos, tempTodo)
-	ctx.JSON(http.StatusOK, &ReturnData{ Status: "success", Msg: "todo inserted successfully"})
+	ctx.JSON(http.StatusOK, &ReturnData{Status: "success", Msg: "todo inserted successfully"})
 }
